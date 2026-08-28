@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth/reset")({
   ssr: false,
@@ -23,15 +24,27 @@ export const Route = createFileRoute("/auth/reset")({
 });
 
 function ResetPage() {
-  const { updatePassword, user } = useAuth();
+  const { updatePassword } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || session) setReady(true);
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setReady(true);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!ready) return setError("Open this page from the reset link in your email.");
     if (password.length < 8) return setError("Password must be at least 8 characters.");
     if (password !== confirm) return setError("Passwords do not match.");
     setBusy(true);
@@ -52,7 +65,7 @@ function ResetPage() {
       <div className="panel w-full max-w-md p-6">
         <h1 className="font-display text-2xl font-semibold">Choose a new password</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {user
+          {ready
             ? "Enter a new password for your account."
             : "Open this page from the reset link in your email."}
         </p>
