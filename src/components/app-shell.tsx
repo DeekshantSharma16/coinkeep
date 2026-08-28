@@ -36,7 +36,7 @@ import { useFinance } from "@/lib/finance-store";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/", label: "Overview", icon: LayoutDashboard },
+  { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { to: "/transactions", label: "Transactions", icon: Receipt },
   { to: "/income", label: "Income", icon: Banknote },
   { to: "/bills", label: "Recurring", icon: Repeat },
@@ -156,7 +156,7 @@ function ThemeToggle() {
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2.5">
+    <Link to="/dashboard" className="flex items-center gap-2.5">
       <img src="/logo.svg" alt="CoinKeep" className="size-9 rounded-xl" />
       <span className="font-display text-lg font-semibold tracking-tight">CoinKeep</span>
     </Link>
